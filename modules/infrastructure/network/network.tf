@@ -3,6 +3,7 @@ resource "google_compute_subnetwork" "public" {
   name          = "public-subnet-${count.index}"
   ip_cidr_range = cidrsubnet(var.public_cidr, var.public_new_bits, count.index)
   network       = local.vpc_network
+  region        = var.region
 }
 
 resource "google_compute_subnetwork" "private" {
@@ -10,6 +11,7 @@ resource "google_compute_subnetwork" "private" {
   name          = "private-subnet-${count.index}"
   ip_cidr_range = cidrsubnet(var.private_cidr, var.private_new_bits, count.index)
   network       = local.vpc_network
+  region        = var.region
 }
 
 resource "google_compute_subnetwork" "db" {
@@ -17,6 +19,7 @@ resource "google_compute_subnetwork" "db" {
   name          = "db-subnet-${count.index}"
   ip_cidr_range = cidrsubnet(var.db_cidr, var.db_new_bits, count.index)
   network       = local.vpc_network
+  region        = var.region
 }
 
 resource "google_compute_firewall" "allow_icmp" {

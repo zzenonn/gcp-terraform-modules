@@ -4,6 +4,12 @@ variable "vpc_id" {
   description = "Project id"
 }
 
+variable "region" {
+  type        = string
+  default     = null
+  description = "Region to deploy networks"
+}
+
 variable "public_cidr" {
   type        = string
   default     = "10.0.0.0/16"
