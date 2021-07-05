@@ -22,6 +22,13 @@ variable "private_cidr" {
   description = "Private CIDR Block"
 }
 
+
+variable "db_cidr" {
+  type        = string
+  default     = "10.192.0.0/16"
+  description = "DB CIDR Block"
+}
+
 variable "startup_script" {
   type        = string
   default     = <<EOF
@@ -34,16 +41,12 @@ EOF
   description = "Startup script for applications."
 }
 
-
-variable "db_cidr" {
-  type        = string
-  default     = "10.192.0.0/16"
-  description = "DB CIDR Block"
-}
-
 variable "db_port" {
   type        = number
   default     = 5432
   description = "Port of the database being used"
 }
 
+locals {
+  regions = concat(var.regions, [data.google_client_config.this.region])
+}

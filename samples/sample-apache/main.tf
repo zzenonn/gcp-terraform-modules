@@ -3,8 +3,14 @@ provider "google" {
   project = "terraform-network-test"
 }
 
+resource "google_compute_network" "vpc" {
+  name                    = "main-vpc"
+  auto_create_subnetworks = false
+}
+
 module "network" {
   source           = "../../modules/infrastructure/network"
+  vpc_id           = google_compute_network.vpc.id
   public_cidr      = var.public_cidr
   private_cidr     = var.private_cidr
   db_cidr          = var.db_cidr
@@ -17,8 +23,6 @@ module "network" {
   cloud_router     = true
 }
 
-
-
 resource "google_compute_router_nat" "nat" {
   name                               = "cloud-nat"
   router                             = module.network.cloud_router
@@ -27,25 +31,13 @@ resource "google_compute_router_nat" "nat" {
 
   dynamic "subnetwork" {
     for_each = [for subnet in module.network.private_subnets : {
-      name = subnet
+      name = subnet.name
     }]
     content {
       name = subnetwork.value.name
 
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
-  }
-}
-
-resource "google_compute_firewall" "allow_http" {
-  name    = "allow-http"
-  network = module.network.vpc
-  source_ranges = ["0.0.0.0/0"]
-  source_tags = ["webserver"]
-  
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
   }
 }
 
@@ -64,8 +56,8 @@ resource "google_compute_instance" "webserver" {
   }
 
   network_interface {
-    network = module.network.vpc
-    subnetwork = module.network.public_subnets[0]
+    network = google_compute_network.vpc.id
+    subnetwork = module.network.public_subnets[0].name
     access_config {} # Assigns a public ip
   }
 

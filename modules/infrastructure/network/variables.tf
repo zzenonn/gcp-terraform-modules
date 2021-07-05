@@ -1,7 +1,6 @@
 variable "vpc_id" {
   type        = string
-  default     = null
-  description = "Project id"
+  description = "VPC ID"
 }
 
 variable "region" {
@@ -76,19 +75,9 @@ variable "db_port" {
   description = "Port of the database being used"
 }
 
-resource "google_compute_network" "vpc" {
-  count                   = var.vpc_id == null ? 1 : 0
-  name                    = "main-vpc"
-  auto_create_subnetworks = false
-}
-
-locals {
-  vpc_network = var.vpc_id == null ? google_compute_network.vpc[0].id : google_compute_network.vpc[0].id
-}
-
 resource "google_compute_router" "router" {
   count   = var.cloud_router ? 1 : 0
   name    = "cloud-router"
-  network = local.vpc_network
+  network = var.vpc_id
 }
 

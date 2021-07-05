@@ -9,8 +9,9 @@ variable "regions" {
   description = "What region(s) the MIG will use"
 }
 
-variable "instance_template" {
-  type        = string
+
+variable "instance_templates" {
+  type        = map(any)
   description = "The template used for the managed instance group (MIG)"
 }
 
