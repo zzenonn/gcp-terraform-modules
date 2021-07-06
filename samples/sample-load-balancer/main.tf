@@ -74,6 +74,8 @@ resource "google_compute_instance_template" "instance_template" {
   name_prefix  = "instance-template-"
   machine_type = "e2-micro"
 
+  region       = each.key
+
   tags = ["allow-health-checks"]
 
   disk {
