@@ -33,7 +33,7 @@ module "network_other_region" {
   vpc_id           = google_compute_network.vpc.id
   region           = each.key
   source           = "../../modules/infrastructure/network"
-  private_cidr     = cidrsubnet("10.64.0.0/8", 6, index(var.regions, each.key) + 1)
+  private_cidr     = cidrsubnet("10.0.0.0/8", 6, index(var.regions, each.key) + 16)
   public_subnets   = 0
   private_subnets  = 1
   db_subnets       = 0
