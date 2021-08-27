@@ -13,7 +13,7 @@ resource "google_compute_network" "vpc" {
 }
 
 module "network" {
-  source           = "../../modules/infrastructure/network"
+  source           = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/network"
   vpc_id           = google_compute_network.vpc.id
   public_cidr      = var.public_cidr
   private_cidr     = var.private_cidr
@@ -28,7 +28,7 @@ module "network" {
 }
 
 module "gke_cluster" {
-  source                 = "../../modules/infrastructure/google-kubernetes"
+  source                 = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/google-kubernetes"
   vpc_id                 = google_compute_network.vpc.id
   subnet_id              = module.network.private_subnets[0].name
   pod_ip_addr_range      = "192.168.0.0/16"
