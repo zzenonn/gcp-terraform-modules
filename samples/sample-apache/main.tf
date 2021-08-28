@@ -9,7 +9,7 @@ resource "google_compute_network" "vpc" {
 }
 
 module "network" {
-  source           = "../../modules/infrastructure/network"
+  source           = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/network"
   vpc_id           = google_compute_network.vpc.id
   public_cidr      = var.public_cidr
   private_cidr     = var.private_cidr
