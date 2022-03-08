@@ -21,9 +21,6 @@ module "network" {
   public_subnets   = 1
   private_subnets  = 1
   db_subnets       = 1
-  public_new_bits  = 8
-  private_new_bits = 8
-  db_new_bits      = 8
   cloud_router     = true
 }
 

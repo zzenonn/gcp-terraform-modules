@@ -47,19 +47,19 @@ variable "db_subnets" {
 
 variable "public_new_bits" {
   type        = number
-  default     = 8
+  default     = 0
   description = "Bits to add to the original public subnet prefix length"
 }
 
 variable "private_new_bits" {
   type        = number
-  default     = 8
+  default     = 0
   description = "Bits to add to the original private subnet prefix length"
 }
 
 variable "db_new_bits" {
   type        = number
-  default     = 8
+  default     = 0
   description = "Bits to add to the original DB subnet prefix length"
 }
 

@@ -1,6 +1,5 @@
 provider "google" {
-  region  = "asia-east2"
-  project = "terraform-network-test"
+  project = "terraform-network-test-343501"
 }
 
 resource "google_compute_network" "vpc" {
@@ -17,15 +16,14 @@ module "network" {
   public_subnets   = 1
   private_subnets  = 1
   db_subnets       = 1
-  public_new_bits  = 8
-  private_new_bits = 8
-  db_new_bits      = 8
+  region = var.region
   cloud_router     = true
 }
 
 resource "google_compute_router_nat" "nat" {
-  name                               = "cloud-nat"
+  name                               = "${var.region}-cloud-nat"
   router                             = module.network.cloud_router
+  region = var.region
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
@@ -44,7 +42,7 @@ resource "google_compute_router_nat" "nat" {
 resource "google_compute_instance" "webserver" {
   name         = "sample-apache"
   machine_type = "e2-micro"
-  zone         = "asia-east2-b"
+  zone         = data.google_compute_zones.zone.names[1]
   
   tags = ["webapp"]
 

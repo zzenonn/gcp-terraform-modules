@@ -4,6 +4,12 @@ variable "vpc_id" {
   description = "Project id"
 }
 
+variable "region" {
+  type        = string
+  default     = "asia-east2"
+  description = "Region to provision resources"
+}
+
 variable "public_cidr" {
   type        = string
   default     = "10.0.0.0/16"
@@ -28,3 +34,6 @@ variable "db_port" {
   description = "Port of the database being used"
 }
 
+data "google_compute_zones" "zone" {
+    region = var.region
+}
