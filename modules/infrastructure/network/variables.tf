@@ -79,5 +79,6 @@ resource "google_compute_router" "router" {
   count   = var.cloud_router ? 1 : 0
   name    = "cloud-router"
   network = var.vpc_id
+  region  = var.region
 }
 

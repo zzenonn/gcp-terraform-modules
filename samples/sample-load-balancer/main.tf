@@ -1,5 +1,4 @@
 provider "google" {
-  region  = "asia-east2"
   project = "terraform-network-test-343501"
 }
 
@@ -13,32 +12,20 @@ resource "google_compute_network" "vpc" {
 }
 
 module "network" {
+  for_each = toset(var.regions)
   source           = "../../modules/infrastructure/network"
+  region = each.key # Increments of 64 in the second octet
   vpc_id           = google_compute_network.vpc.id
-  public_cidr      = var.public_cidr
-  private_cidr     = var.private_cidr
-  db_cidr          = var.db_cidr
+  public_cidr      = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) ) #  10.*.0
+  private_cidr     = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) + 128) # 10.*.128
+  db_cidr          = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) + 192) # 10.*.192
   public_subnets   = 1
   private_subnets  = 1
   db_subnets       = 1
-  public_new_bits  = 8
-  private_new_bits = 8
-  db_new_bits      = 8
+  public_new_bits  = 0
+  private_new_bits = 0
+  db_new_bits      = 0
   cloud_router     = true
-}
-
-module "network_other_region" {
-  for_each = toset(var.regions)
-
-  vpc_id           = google_compute_network.vpc.id
-  region           = each.key
-  source           = "../../modules/infrastructure/network"
-  private_cidr     = cidrsubnet("10.0.0.0/8", 6, index(var.regions, each.key) + 16)
-  public_subnets   = 0
-  private_subnets  = 1
-  db_subnets       = 0
-  private_new_bits = 10
-  cloud_router     = false
 }
 
 module "lb_scaling" {
@@ -53,15 +40,18 @@ module "lb_scaling" {
 
 
 resource "google_compute_router_nat" "nat" {
-  name                               = "cloud-nat"
-  router                             = module.network.cloud_router
+  for_each = toset(var.regions)
+  name                               = "${each.key}-cloud-nat"
+  router                             = module.network[each.key].cloud_router
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  region = each.key
+  
 
   dynamic "subnetwork" {
-    for_each = toset(var.regions)
+    for_each = toset(module.network[each.key].private_subnets[*])
     content {
-      name = try(module.network_other_region[subnetwork.key].private_subnets[0].name, module.network.private_subnets[0].name)
+      name = subnetwork.key.name
 
       source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
     }
@@ -87,7 +77,7 @@ resource "google_compute_instance_template" "instance_template" {
 
   network_interface {
     network    = google_compute_network.vpc.id
-    subnetwork = try(module.network_other_region[each.key].private_subnets[0].name, module.network.private_subnets[0].name)
+    subnetwork = module.network[each.key].private_subnets[0].name
   }
 
   metadata_startup_script = var.startup_script

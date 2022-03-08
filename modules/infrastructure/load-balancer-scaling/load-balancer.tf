@@ -79,7 +79,7 @@ resource "google_compute_backend_service" "service" {
 }
 
 resource "google_compute_url_map" "urlmap" {
-  name        = "urlmap"
+  name        = "app-urlmap"
   description = "Basic URL map."
   default_service = google_compute_backend_service.service.id
 

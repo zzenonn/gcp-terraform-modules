@@ -4,6 +4,12 @@ variable "vpc_id" {
   description = "Project id"
 }
 
+variable "vpc_cidr" {
+  type        = string
+  default     = "10.0.0.0/8"
+  description = "VPC CIDR Block"
+}
+
 variable "public_cidr" {
   type        = string
   default     = "10.0.0.0/16"
