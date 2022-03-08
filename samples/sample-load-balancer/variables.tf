@@ -28,3 +28,13 @@ variable "db_port" {
   default     = 5432
   description = "Port of the database being used"
 }
+
+variable "regions" {
+  type        = list(any)
+  description = "Regions to include"
+}
+
+variable "startup_script" {
+  type        = string
+  description = "Startup script for VMs"
+}

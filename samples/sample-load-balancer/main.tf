@@ -1,6 +1,6 @@
 provider "google" {
   region  = "asia-east2"
-  project = "terraform-network-test"
+  project = "terraform-network-test-343501"
 }
 
 data "google_client_config" "this" {
@@ -45,9 +45,9 @@ module "lb_scaling" {
   depends_on = [
     google_compute_router_nat.nat
   ]
-  source           = "../../modules/infrastructure/load-balancer-scaling"
-  regions = local.regions
-  vpc_id      = google_compute_network.vpc.id
+  source             = "../../modules/infrastructure/load-balancer-scaling"
+  regions            = var.regions
+  vpc_id             = google_compute_network.vpc.id
   instance_templates = google_compute_instance_template.instance_template
 }
 
@@ -59,7 +59,7 @@ resource "google_compute_router_nat" "nat" {
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
   dynamic "subnetwork" {
-    for_each = toset(local.regions)
+    for_each = toset(var.regions)
     content {
       name = try(module.network_other_region[subnetwork.key].private_subnets[0].name, module.network.private_subnets[0].name)
 
@@ -69,24 +69,24 @@ resource "google_compute_router_nat" "nat" {
 }
 
 resource "google_compute_instance_template" "instance_template" {
-  for_each = toset(local.regions)
+  for_each = toset(var.regions)
 
   name_prefix  = "instance-template-"
   machine_type = "e2-micro"
 
-  region       = each.key
+  region = each.key
 
   tags = ["allow-health-checks"]
 
   disk {
     source_image = "debian-10"
-    auto_delete       = true
-    boot              = true
-    disk_size_gb      = 10
+    auto_delete  = true
+    boot         = true
+    disk_size_gb = 10
   }
 
   network_interface {
-    network = google_compute_network.vpc.id
+    network    = google_compute_network.vpc.id
     subnetwork = try(module.network_other_region[each.key].private_subnets[0].name, module.network.private_subnets[0].name)
   }
 
