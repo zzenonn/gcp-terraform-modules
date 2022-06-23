@@ -2,13 +2,13 @@
 resource "google_container_cluster" "primary" {
   name     = "${data.google_project.project.name}-gke"
   location = var.region
-  node_locations = data.google_compute_zones.available.names
+  node_locations = var.enable_autopilot ? null : data.google_compute_zones.available.names
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  remove_default_node_pool = var.enable_autopilot ? null : true
+  initial_node_count       = var.enable_autopilot ? null : 1
 
   enable_autopilot = var.enable_autopilot
 
