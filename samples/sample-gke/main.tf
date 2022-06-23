@@ -1,6 +1,5 @@
 provider "google" {
-  region  = "asia-east2"
-  project = "terraform-network-test"
+  project = "terraform-network-test-343501"
 }
 
 data "google_client_config" "this" {
@@ -13,16 +12,22 @@ resource "google_compute_network" "vpc" {
 }
 
 module "network" {
-  source           = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/network"
+  for_each = toset(var.regions)
+  source           = "../../modules/infrastructure/network"
+  region = each.key # Increments of 64 in the second octet
   vpc_id           = google_compute_network.vpc.id
-  public_cidr      = var.public_cidr
-  private_cidr     = var.private_cidr
-  db_cidr          = var.db_cidr
+  public_cidr      = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) ) #  10.*.0
+  private_cidr     = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) + 128) # 10.*.128
+  db_cidr          = cidrsubnet(var.vpc_cidr, 16, (index(var.regions, each.key) * 16384) + 192) # 10.*.192
   public_subnets   = 1
   private_subnets  = 1
   db_subnets       = 1
+  public_new_bits  = 0
+  private_new_bits = 0
+  db_new_bits      = 0
   cloud_router     = true
 }
+
 
 module "gke_cluster" {
   source                 = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/google-kubernetes"
