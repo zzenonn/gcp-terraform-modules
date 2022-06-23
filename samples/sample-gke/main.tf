@@ -30,9 +30,10 @@ module "network" {
 
 
 module "gke_cluster" {
+  for_each = toset(var.regions)
   source                 = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/google-kubernetes"
   vpc_id                 = google_compute_network.vpc.id
-  subnet_id              = module.network.private_subnets[0].name
+  subnet_id              = module.network[each.key].private_subnets[0].name
   pod_ip_addr_range      = "192.168.0.0/16"
   services_ip_addr_range = "172.16.0.0/16"
   node_type              = "e2-medium"
@@ -41,14 +42,21 @@ module "gke_cluster" {
 
 
 resource "google_compute_router_nat" "nat" {
-  name                               = "cloud-nat"
-  router                             = module.network.cloud_router
+  for_each = toset(var.regions)
+  name                               = "${each.key}-cloud-nat"
+  router                             = module.network[each.key].cloud_router
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  region = each.key
+  
 
-  subnetwork {
-    name = module.network.private_subnets[0].name
-    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  dynamic "subnetwork" {
+    for_each = toset(module.network[each.key].private_subnets[*])
+    content {
+      name = subnetwork.key.name
+
+      source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+    }
   }
 }
 
