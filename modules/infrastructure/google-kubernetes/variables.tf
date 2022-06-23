@@ -4,6 +4,12 @@ variable "region" {
   description = "Region to deploy kubernetes"
 }
 
+variable "enable_autopilot" {
+  type        = bool
+  default     = false
+  description = "Enable GKE autopilot"
+}
+
 variable "gke_num_nodes" {
   default     = 3
   description = "Number of gke nodes"

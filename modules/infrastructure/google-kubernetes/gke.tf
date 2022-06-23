@@ -21,6 +21,7 @@ resource "google_container_cluster" "primary" {
 
 # Separately Managed Node Pool
 resource "google_container_node_pool" "primary_nodes" {
+  count = var.enable_autopilot ? 0 : 1
   name       = "${google_container_cluster.primary.name}-node-pool"
   location = var.region
 
