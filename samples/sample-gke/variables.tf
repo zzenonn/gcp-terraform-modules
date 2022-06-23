@@ -4,6 +4,12 @@ variable "vpc_id" {
   description = "Project id"
 }
 
+variable "enable_autopilot" {
+  type        = bool
+  default     = false
+  description = "Enable GKE autopilot"
+}
+
 variable "regions" {
   type        = list(string)
   default     = []
