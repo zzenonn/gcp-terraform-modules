@@ -31,7 +31,7 @@ module "network" {
 
 module "gke_cluster" {
   for_each = toset(var.regions)
-  source                 = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/google-kubernetes"
+  source                 = "github.com/zzenonn/gcp-terraform-modules/modules/infrastructure/google-kubernetes" 
   region                 = each.key
   vpc_id                 = google_compute_network.vpc.id
   subnet_id              = module.network[each.key].private_subnets[0].name
@@ -39,6 +39,7 @@ module "gke_cluster" {
   services_ip_addr_range = "172.16.0.0/16"
   node_type              = "e2-medium"
   gke_num_nodes          = 1
+  enable_autopilot       = var.enable_autopilot  
 }
 
 
