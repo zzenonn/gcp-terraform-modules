@@ -44,3 +44,8 @@ resource "google_container_node_pool" "primary_nodes" {
     }
   }
 }
+
+# Static global IP for ingress
+resource "google_compute_global_address" "default" {
+  name = "${data.google_project.project.name}-global-address"
+}
