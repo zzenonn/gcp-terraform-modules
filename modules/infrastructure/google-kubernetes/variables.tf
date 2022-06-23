@@ -1,3 +1,9 @@
+variable "region" {
+  type        = string
+  default     = null
+  description = "Region to deploy kubernetes"
+}
+
 variable "gke_num_nodes" {
   default     = 3
   description = "Number of gke nodes"
@@ -30,4 +36,3 @@ data "google_project" "project" {}
 
 data "google_compute_zones" "available" {}
 
-data "google_client_config" "current" {}

@@ -1,7 +1,7 @@
 # GKE cluster
 resource "google_container_cluster" "primary" {
   name     = "${data.google_project.project.name}-gke"
-  location = data.google_client_config.current.region
+  location = var.region
   node_locations = data.google_compute_zones.available.names
 
   # We can't create a cluster with no node pool defined, but we want to only use
