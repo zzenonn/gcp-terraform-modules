@@ -10,7 +10,7 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = var.enable_autopilot ? null : true
   initial_node_count       = var.enable_autopilot ? null : 1
 
-  enable_autopilot = var.enable_autopilot
+  enable_autopilot = var.enable_autopilot ? true : null
 
   network    = var.vpc_id
   subnetwork = var.subnet_id
