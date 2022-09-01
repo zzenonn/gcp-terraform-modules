@@ -40,7 +40,6 @@
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      kubernetes.io/ingress.global-static-ip-name: "terraform-network-test-global-address"
   spec:
     rules:
       - http:
