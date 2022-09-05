@@ -143,6 +143,7 @@
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
+      kubernetes.io/ingress.class: "gce"
   spec:
     rules:
       - http:
