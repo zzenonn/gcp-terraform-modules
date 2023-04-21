@@ -14,6 +14,7 @@ resource "google_container_cluster" "primary" {
 
   network    = var.vpc_id
   subnetwork = var.subnet_id
+  min_master_version = "1.26.3-gke.400"
 
   ip_allocation_policy {
       cluster_ipv4_cidr_block = var.pod_ip_addr_range
