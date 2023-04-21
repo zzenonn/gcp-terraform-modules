@@ -1,5 +1,5 @@
 provider "google" {
-  project = "admu-iscs3023"
+  project = "admu-iscs-30-23"
 }
 
 data "google_client_config" "this" {
@@ -27,7 +27,6 @@ module "network" {
   db_new_bits      = 0
   cloud_router     = true
 }
-
 
 module "gke_cluster" {
   for_each = toset(var.regions)
@@ -62,31 +61,3 @@ resource "google_compute_router_nat" "nat" {
   }
 }
 
-# resource "google_compute_instance_template" "instance_template" {
-#   for_each = toset(local.regions)
-
-#   name_prefix  = "instance-template-"
-#   machine_type = "e2-micro"
-
-#   region       = each.key
-
-#   tags = ["allow-health-checks"]
-
-#   disk {
-#     source_image = "debian-10"
-#     auto_delete       = true
-#     boot              = true
-#     disk_size_gb      = 10
-#   }
-
-#   network_interface {
-#     network = google_compute_network.vpc.id
-#     subnetwork = try(module.network_other_region[each.key].private_subnets[0].name, module.network.private_subnets[0].name)
-#   }
-
-#   metadata_startup_script = var.startup_script
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
