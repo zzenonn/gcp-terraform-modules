@@ -1,5 +1,5 @@
 provider "google" {
-  project = "admu-iscs-30-23"
+  project = "terraform-network-test-343501"
 }
 
 data "google_client_config" "this" {

@@ -36,9 +36,9 @@ module "gke_cluster" {
   subnet_id              = module.network[each.key].private_subnets[0].name
   pod_ip_addr_range      = "192.168.0.0/16"
   services_ip_addr_range = "172.16.0.0/16"
-  node_type              = "e2-medium"
+  node_type              = "e2-highmem-4"
   gke_num_nodes          = 1
-  enable_autopilot       = var.enable_autopilot  
+  enable_autopilot       = var.enable_autopilot 
 }
 
 
