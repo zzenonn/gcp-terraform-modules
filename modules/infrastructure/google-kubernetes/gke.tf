@@ -26,11 +26,11 @@ resource "google_container_cluster" "primary" {
   }
 
   fleet {
-      project = data.google_project.current.project_id
+      project = data.google_project.project.project_id
   }
 
   workload_identity_config {
-    workload_pool = "${data.google_project.current.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
 
