@@ -23,6 +23,10 @@ resource "google_container_cluster" "primary" {
       cluster_ipv4_cidr_block = var.pod_ip_addr_range
       services_ipv4_cidr_block = var.services_ip_addr_range
   }
+
+  lifecycle {
+    ignore_changes = [node_locations]
+  }
 }
 
 # Separately Managed Node Pool
