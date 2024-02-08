@@ -3,6 +3,7 @@ resource "google_container_cluster" "primary" {
   name     = "${data.google_project.project.name}-gke"
   location = var.region
   node_locations = data.google_compute_zones.available.names // var.enable_autopilot ? null : data.google_compute_zones.available.names
+  deletion_protection = false
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -23,6 +24,16 @@ resource "google_container_cluster" "primary" {
       cluster_ipv4_cidr_block = var.pod_ip_addr_range
       services_ipv4_cidr_block = var.services_ip_addr_range
   }
+
+  fleet {
+      project = data.google_project.current.project_id
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.current.project_id}.svc.id.goog"
+  }
+
+
 
   lifecycle {
     ignore_changes = [node_locations]
