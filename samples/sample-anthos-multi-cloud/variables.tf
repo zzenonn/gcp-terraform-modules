@@ -4,6 +4,18 @@ variable "vpc_id" {
   description = "Project id"
 }
 
+variable "aws_profile" {
+  type        = string
+  default     = "default"
+  description = "AWS profile to use for authentication"
+}
+
+variable "gcp_project" {
+  type        = string
+  default     = "default"
+  description = "GCP project to provision resources in"
+}
+
 variable "networks" {
   type = object({
     cidr_block       = string

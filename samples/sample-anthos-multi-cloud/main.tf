@@ -1,12 +1,12 @@
 provider "google" {
-  project = "admu-iscs-30-23"
+  project = var.gcp_project
 }
 
 data "google_project" "current" {}
 
 provider "aws" {
   region  = "ap-southeast-1"
-  profile = "solcon-poc"
+  profile = var.aws_profile
 }
 
 data "google_client_config" "this" {
