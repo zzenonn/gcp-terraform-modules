@@ -93,7 +93,7 @@ To deploy the config management operators for synchronizing your clusters with t
     gcloud container fleet memberships get-credentials $PROJECT_ID-gke --project $PROJECT_ID
     kubectx gke=connectgateway_${PROJECT_ID}_${REGION}_${PROJECT_ID}-gke
     kubectx gke
-    kubectl apply -f config-management-operator.yaml
+    kubectl apply -f kubernetes-manifests/config-sync/config-management-operator.yaml
     ```
 
     Do the same with the AWS cluster
@@ -101,7 +101,7 @@ To deploy the config management operators for synchronizing your clusters with t
     gcloud container fleet memberships get-credentials $PROJECT_ID-aws-cluster --project $PROJECT_ID
     kubectx aws=connectgateway_${PROJECT_ID}_global_${PROJECT_ID}-aws-cluster
     kubectx aws
-    kubectl apply -f config-management-operator.yaml
+    kubectl apply -f kubernetes-manifests/config-sync/config-management-operator.yaml
     ```
 
 3. **Configure Git Credentials Secret**
@@ -109,7 +109,7 @@ To deploy the config management operators for synchronizing your clusters with t
     If your cluster configurations are stored in a private Git repository, it's necessary to create a Kubernetes secret with your Git SSH credentials to implement the GitOps approach. The following command prepares a secret YAML file by replacing a placeholder with your base64-encoded SSH private key.
 
     ```sh
-    sed "s|<base64-encoded-id_rsa.acm>|$(cat /path/to/your/id_rsa.acm | base64 | tr -d '\n')|g" git-creds-secret-template.yaml > git-creds-secret.yaml
+    sed "s|<base64-encoded-id_rsa.acm>|$(cat /path/to/your/id_rsa.acm | base64 | tr -d '\n')|g" kubernetes-manifests/config-sync/gitops-secret-ssh.yaml > kubernetes-manifests/config-sync/gitops-secret-ssh.yaml
     ```
     Ensure you replace /path/to/your/id_rsa.acm with the actual path to your SSH private key file. This step is essential for authenticating the Config Management Operator with your Git repository, enabling it to fetch and apply the configurations.
     
