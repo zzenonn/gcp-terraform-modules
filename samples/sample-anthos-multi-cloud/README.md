@@ -84,10 +84,11 @@ To deploy the config management operators for synchronizing your clusters with t
    ```sh
    REGION="asia-southeast1" # replace with your region
    PROJECT_ID="<project_id>" # replace with your GCP project ID
+   REPO="git@github.com:zzenonn/anthos-config-management-demo.git" # replace with your own Git repository
    ```
-2. **Deploy to Attached Clusters**
+2. **Deploy CRDs and Role Bindings to Attached Clusters**
 
-    To deploy the Config Management Operator to a GKE cluster, obtain the cluster credentials, switch your kubectl context to the GKE cluster, and apply the Config Management Operator YAML file.
+    Deploy the custom resource definitions and role bindings for the config management operator. Switch your kubectl context to the GKE cluster, and apply the Config Management Operator YAML file.
 
     ```sh
     gcloud container fleet memberships get-credentials $PROJECT_ID-gke --project $PROJECT_ID
@@ -112,7 +113,22 @@ To deploy the config management operators for synchronizing your clusters with t
     sed "s|<base64-encoded-id_rsa.acm>|$(cat /path/to/your/id_rsa.acm | base64 | tr -d '\n')|g" kubernetes-manifests/config-sync/gitops-secret-ssh.yaml > kubernetes-manifests/config-sync/gitops-secret-ssh-filled.yaml
     ```
     Ensure you replace /path/to/your/id_rsa.acm with the actual path to your SSH private key file. This step is essential for authenticating the Config Management Operator with your Git repository, enabling it to fetch and apply the configurations.
-    
+
+4. **Deploy the Config Management Operator**
+
+    To deploy the Config Management Operator to a GKE cluster, obtain the cluster credentials, switch your kubectl context to the GKE cluster, and apply the Config Management Operator YAML file.
+
+    ```sh
+    kubectx gke
+    kubectl apply -f kubernetes-manifests/config-sync/gke-config-management.yaml
+    ```
+
+    Do the same with the AWS cluster
+    ```sh
+    kubectx aws
+    kubectl apply -f kubernetes-manifests/config-sync/aws-config-management.yaml
+    ```
+
 ## Note
 
 Please ensure that you have the necessary permissions in your AWS and GCP accounts to create and manage the resources defined in these scripts. Also, remember that you may incur charges in your AWS and GCP accounts for the resources created by these scripts.
