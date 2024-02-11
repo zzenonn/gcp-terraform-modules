@@ -60,6 +60,7 @@ For example, you can change the `vpc_cidr` variable to use a different CIDR bloc
 ## Multi-cluster
 
 ### Login to AWS Cluster
+
 Make sure you log-in to the AWS cluster:
 
 1. **Go to Navigation > Kubernetes Engine > Clusters**, scroll to the right, click on the 3 dots to open the dropdown menu of the **onprem-connect** cluster row, and click on the **Log in** option.
@@ -67,6 +68,65 @@ Make sure you log-in to the AWS cluster:
 2. When prompted, use your Google Cloud account to login.
 
 3. You should now see two clusters listed with green checkmarks which indicates both clusters are registered successfully.
+
+
+### Multi-Cluster Gateway
+
+Use `kubectx` and the multi-cluster gateway to set the context and retreive credentials using your Google Cloud Identity.
+
+Begin by specifying your GCP region and project ID. Replace `"asia-southeast1"` with your target region and `<project_id>` with your Google Cloud Platform project ID.
+
+    ```sh
+     REGION="asia-southeast1" # replace with your region
+     PROJECT_ID="<project_id>" # replace with your GCP project ID
+    ```
+
+For the GKE Cluster
+
+    ```sh
+    gcloud container fleet memberships get-credentials $PROJECT_ID-gke --project $PROJECT_ID
+    kubectx gke=connectgateway_${PROJECT_ID}_${REGION}_${PROJECT_ID}-gke
+    ```
+
+For the AWS Cluster
+
+    ```sh
+    gcloud container fleet memberships get-credentials $PROJECT_ID-aws-cluster --project $PROJECT_ID
+    kubectx aws=connectgateway_${PROJECT_ID}_global_${PROJECT_ID}-aws-cluster
+    ```
+
+### Anthos Service Mesh
+
+Anthos Service Mesh (ASM) is based on the open source Istio service mesh. This allows for multi-cluster management. Make sure to [install the required components](https://cloud.google.com/service-mesh/docs/unified-install/install-dependent-tools).
+
+#### Installing the Service Mesh
+
+For the GKE Cluster
+
+    ```sh
+    kubectx gke
+    asmcli install \
+     --project_id PROJECT_ID \
+     --cluster_name $PROJECT_ID-gke \
+     --cluster_location CLUSTER_LOCATION \
+     --fleet_id $PROJECT_ID \
+     --output_dir DIR_PATH \
+     --enable_all \
+     --ca mesh_ca
+    ```
+
+For the AWS Cluster
+
+    ```sh
+    kubectx aws
+    asmcli install \
+     --fleet_id $PROJECT_ID \
+    #  --kubeconfig KUBECONFIG_FILE \
+     --output_dir DIR_PATH \
+     --platform multicloud \
+     --enable_all \
+     --ca mesh_ca
+    ``` 
 
 
 ### Anthos Config Management
@@ -84,23 +144,18 @@ To deploy the config management operators for synchronizing your clusters with t
    ```sh
    REGION="asia-southeast1" # replace with your region
    PROJECT_ID="<project_id>" # replace with your GCP project ID
-   REPO="git@github.com:zzenonn/anthos-config-management-demo.git" # replace with your own Git repository
    ```
 2. **Deploy CRDs and Role Bindings to Attached Clusters**
 
     Deploy the custom resource definitions and role bindings for the config management operator. Switch your kubectl context to the GKE cluster, and apply the Config Management Operator YAML file.
 
     ```sh
-    gcloud container fleet memberships get-credentials $PROJECT_ID-gke --project $PROJECT_ID
-    kubectx gke=connectgateway_${PROJECT_ID}_${REGION}_${PROJECT_ID}-gke
     kubectx gke
     kubectl apply -f kubernetes-manifests/config-sync/config-management-operator.yaml
     ```
 
     Do the same with the AWS cluster
     ```sh
-    gcloud container fleet memberships get-credentials $PROJECT_ID-aws-cluster --project $PROJECT_ID
-    kubectx aws=connectgateway_${PROJECT_ID}_global_${PROJECT_ID}-aws-cluster
     kubectx aws
     kubectl apply -f kubernetes-manifests/config-sync/config-management-operator.yaml
     ```
@@ -113,6 +168,15 @@ To deploy the config management operators for synchronizing your clusters with t
     sed "s|<base64-encoded-id_rsa.acm>|$(cat /path/to/your/id_rsa.acm | base64 | tr -d '\n')|g" kubernetes-manifests/config-sync/gitops-secret-ssh.yaml > kubernetes-manifests/config-sync/gitops-secret-ssh-filled.yaml
     ```
     Ensure you replace /path/to/your/id_rsa.acm with the actual path to your SSH private key file. This step is essential for authenticating the Config Management Operator with your Git repository, enabling it to fetch and apply the configurations.
+
+    Create the secret in each cluster:
+
+    ```sh
+    kubectx gke
+    kubectl apply -f kubernetes-manifests/config-sync/gitops-secret-ssh-filled.yaml
+    kubectx aws
+    kubectl apply -f kubernetes-manifests/config-sync/gitops-secret-ssh-filled.yaml
+    ```
 
 4. **Deploy the Config Management Operator**
 

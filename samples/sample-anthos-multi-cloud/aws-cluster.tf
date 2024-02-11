@@ -42,6 +42,7 @@ resource "google_container_aws_cluster" "primary" {
     subnet_ids           = aws_subnet.private[*].id
     version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
     instance_type        = "t3.medium"
+    security_group_ids = [ aws_security_group.outbound_access.id ]
 
     main_volume {
       iops        = 3000
@@ -92,8 +93,8 @@ resource "google_container_aws_node_pool" "primary" {
   version   = "${data.google_container_aws_versions.versions.valid_versions[0]}"
 
   autoscaling {
-    max_node_count = 2
-    min_node_count = 1
+    max_node_count = 3
+    min_node_count = 2
   }
 
   cluster = google_container_aws_cluster.primary.name
@@ -105,6 +106,7 @@ resource "google_container_aws_node_pool" "primary" {
 
     iam_instance_profile = aws_iam_instance_profile.aws_cluster_anthos_np_instance_profile.arn
     instance_type        = "t3.medium"
+    security_group_ids = [ aws_security_group.outbound_access.id ]
 
 
     root_volume {
