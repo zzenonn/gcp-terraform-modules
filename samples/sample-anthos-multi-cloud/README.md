@@ -106,13 +106,14 @@ For the GKE Cluster
     ```sh
     kubectx gke
     asmcli install \
-     --project_id PROJECT_ID \
+     --project_id $PROJECT_ID \
      --cluster_name $PROJECT_ID-gke \
-     --cluster_location CLUSTER_LOCATION \
+     --cluster_location $REGION \
      --fleet_id $PROJECT_ID \
-     --output_dir DIR_PATH \
+     --output_dir /tmp/gke-asm-dir \
      --enable_all \
-     --ca mesh_ca
+     --ca mesh_ca \
+     --option stackdriver
     ```
 
 For the AWS Cluster
@@ -121,11 +122,12 @@ For the AWS Cluster
     kubectx aws
     asmcli install \
      --fleet_id $PROJECT_ID \
-    #  --kubeconfig KUBECONFIG_FILE \
-     --output_dir DIR_PATH \
+     --kubeconfig $HOME/.kube/config \
+     --output_dir /tmp/aws-asm-dir \
      --platform multicloud \
      --enable_all \
-     --ca mesh_ca
+     --ca mesh_ca \
+     --option stackdriver
     ``` 
 
 
@@ -192,6 +194,80 @@ To deploy the config management operators for synchronizing your clusters with t
     kubectx aws
     kubectl apply -f kubernetes-manifests/config-sync/aws-config-management.yaml
     ```
+
+### Service Mesh Single Cluster Test Setup
+
+This section outlines the steps to set up and test a service mesh within a single Kubernetes cluster with deployments from the [Online Boutique application](https://github.com/GoogleCloudPlatform/microservices-demo). This setup is intended for demonstration purposes and does not include configurations for multi-cluster environments. This assumes that the resources in the config management operator have been deployed. 
+
+1. **Configure Istio ConfigMap**:
+   Apply a ConfigMap for Istio to enable default tracing with Stackdriver.
+
+    ```sh
+    cat <<EOF | kubectl apply -f -
+    apiVersion: v1
+    data:
+    mesh: |-
+    defaultConfig:
+    tracing:
+    stackdriver: {}
+    kind: ConfigMap
+    metadata:
+    name: istio-asm-managed
+    namespace: istio-system
+    EOF
+    ```
+
+
+2. **Deploy Microservices Demo Application**:
+Deploy the application manifests from the GoogleCloudPlatform microservices demo repository.
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/kubernetes-manifests.yaml -n prod
+```
+
+
+3. **Patch ProductCatalogService Deployment**:
+Update the `productcatalogservice` deployment to include a specific version label.
+
+```sh
+kubectl patch deployments/productcatalogservice -p '{"spec":{"template":{"metadata":{"labels":{"version":"v1"}}}}}' -n prod
+```
+
+
+4. **Set Up Anthos Service Mesh Gateways**:
+Clone the Anthos Service Mesh packages repository and apply the Istio ingress gateway configuration.
+
+```sh
+cd /tmp
+git clone https://github.com/GoogleCloudPlatform/anthos-service-mesh-packages
+kubectl apply -f anthos-service-mesh-packages/samples/gateways/istio-ingressgateway -n prod
+```
+
+
+5. **Apply Gateway API CRDs and Mesh CRD**:
+Apply the necessary Custom Resource Definitions (CRDs) for Gateway API and the mesh configuration.
+
+```sh
+kubectl apply -k "github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v0.6.0" -n prod
+kubectl kustomize "https://github.com/GoogleCloudPlatform/gke-networking-recipes.git/gateway-api/config/mesh/crd" | kubectl apply -n prod -f -
+```
+
+
+6. **Deploy Istio Manifests**:
+Apply Istio manifests to the `prod` namespace for the microservices demo application.
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/istio-manifests.yaml -n prod
+```
+
+
+7. **Verify Deployments**:
+Check the deployments in the `prod` namespace to ensure they are correctly created and running. Ensure that the services are correctly set up and available in the `prod` namespace.
+
+```sh
+kubectl get deployments -n prod
+kubectl get services -n prod
+```
 
 ## Note
 
